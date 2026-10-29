@@ -1,0 +1,502 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Bubble</title>
+<meta name="description" content="Bubble, la inteligencia artificial del equipo Machaca.">
+<meta name="theme-color" content="#F5F5F7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="iconos/icono.svg" type="image/svg+xml">
+<link rel="icon" href="iconos/icono-192.png" sizes="192x192" type="image/png">
+<link rel="apple-touch-icon" href="iconos/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Bubble">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="estilos.css">
+</head>
+<body data-cara="cielo">
+
+<!-- Dibujo de manglar que se usa en la carátula -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="mangle" viewBox="-80 -170 160 175">
+      <g fill="currentColor">
+        <circle cx="0" cy="-122" r="36"/><circle cx="-34" cy="-104" r="29"/><circle cx="34" cy="-102" r="31"/>
+        <circle cx="-14" cy="-142" r="25"/><circle cx="20" cy="-140" r="23"/><circle cx="-56" cy="-90" r="18"/>
+        <circle cx="56" cy="-88" r="20"/><circle cx="-6" cy="-96" r="26"/>
+        <path d="M-3.5 -100 L3.5 -100 L3 -52 L-3 -52 Z"/>
+      </g>
+      <g fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round">
+        <path d="M0 -60 C -14 -52, -34 -36, -44 0"/>
+        <path d="M0 -60 C -8 -44, -20 -24, -24 0"/>
+        <path d="M0 -60 C 8 -44, 18 -24, 22 0"/>
+        <path d="M0 -60 C 14 -52, 36 -34, 46 0"/>
+        <path d="M0 -50 C -4 -36, -8 -18, -9 0"/>
+        <path d="M0 -50 C 4 -36, 10 -18, 11 0"/>
+        <path d="M-30 -90 C -40 -70, -58 -40, -62 0"/>
+        <path d="M30 -88 C 42 -66, 58 -38, 64 0"/>
+      </g>
+    </symbol>
+  </defs>
+</svg>
+
+<template id="t-cara">
+  <svg class="cara-manglar" viewBox="0 0 1000 300" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
+    <rect x="0" y="262" width="1000" height="38" fill="var(--reflejo)" opacity=".35"/>
+    <use href="#mangle" x="-60" y="96" width="200" height="170"/>
+    <use href="#mangle" x="70" y="140" width="140" height="125"/>
+    <use href="#mangle" x="170" y="175" width="100" height="90"/>
+    <use href="#mangle" x="740" y="165" width="110" height="100"/>
+    <use href="#mangle" x="820" y="110" width="180" height="155"/>
+    <use href="#mangle" x="930" y="150" width="130" height="115"/>
+    <g opacity=".2" transform="translate(0 532) scale(1 -1)">
+      <use href="#mangle" x="-60" y="96" width="200" height="170"/>
+      <use href="#mangle" x="70" y="140" width="140" height="125"/>
+      <use href="#mangle" x="820" y="110" width="180" height="155"/>
+      <use href="#mangle" x="930" y="150" width="130" height="115"/>
+    </g>
+    <g stroke="rgba(255,255,255,.55)" stroke-width="2" stroke-linecap="round">
+      <line x1="300" y1="276" x2="380" y2="276"/><line x1="420" y1="286" x2="470" y2="286"/>
+      <line x1="560" y1="279" x2="640" y2="279"/><line x1="660" y1="291" x2="700" y2="291"/>
+    </g>
+  </svg>
+  <div class="reloj" aria-hidden="true"></div>
+</template>
+
+<!-- ============ Entrar ============ -->
+<main id="entrar" class="pantalla" hidden>
+  <div class="entrar-caja">
+    <section class="cara" id="cara-entrar">
+      <div class="cara-saludo">Hola, soy Bubble<small class="cara-equipo">La IA del equipo Machaca</small></div>
+      <button class="cara-burbuja" type="button" aria-label="Bubble"><canvas></canvas></button>
+    </section>
+
+    <section class="entrar-panel" id="panel-perfiles" aria-labelledby="t-quien">
+      <h1 id="t-quien">¿Quién eres?</h1>
+      <label class="solo-lector" for="buscar-perfil">Busca tu nombre</label>
+      <input type="search" id="buscar-perfil" placeholder="Busca tu nombre" autocomplete="off" autocapitalize="none" hidden>
+      <div class="perfiles" id="perfiles" role="group" aria-label="Personas del equipo"></div>
+      <form id="form-clave" class="clave-fila" hidden autocomplete="on">
+        <input type="text" id="usuario-oculto" name="username" autocomplete="username" hidden>
+        <label class="solo-lector" for="clave">Contraseña</label>
+        <input type="password" id="clave" name="password" maxlength="12" autocomplete="current-password" placeholder="Contraseña" enterkeyhint="go">
+        <button class="btn btn-pri" type="submit">Entrar</button>
+      </form>
+      <div class="aviso" id="aviso-entrar" role="alert"></div>
+    </section>
+
+    <section class="entrar-panel" id="panel-preparar" hidden aria-labelledby="t-preparar">
+      <h1 id="t-preparar">Preparar Bubble en este dispositivo</h1>
+      <p>No encontré el servidor del equipo. Puedes usar Bubble solo en este dispositivo mientras lo subes a Netlify (las instrucciones vienen en el archivo LEEME).</p>
+      <label class="etiqueta">Nombre del equipo
+        <input type="text" id="prep-equipo" value="Machaca" maxlength="30">
+      </label>
+      <div>
+        <div class="etiqueta" style="margin-bottom:6px">Personas (usuario corto y contraseña corta)</div>
+        <div id="prep-personas" style="display:grid;gap:8px"></div>
+        <button class="btn btn-chico" type="button" id="prep-mas" style="margin-top:8px">Agregar persona</button>
+      </div>
+      <label class="etiqueta">O pega aquí la línea de cuentas de cuentas-bubble.txt
+        <textarea id="prep-linea" rows="3" placeholder="mateo:1234, ana:5678, leo:9012" autocapitalize="none" autocomplete="off" spellcheck="false"></textarea>
+      </label>
+      <label class="etiqueta">Clave de Gemini (la misma de Aria)
+        <input type="password" id="prep-clave" placeholder="Pégala aquí" autocomplete="off">
+      </label>
+      <div class="fila"><button class="btn btn-pri" type="button" id="prep-listo">Listo</button></div>
+      <div class="aviso" id="aviso-preparar" role="alert"></div>
+    </section>
+  </div>
+</main>
+
+<!-- ============ Inicio ============ -->
+<main id="inicio" class="pantalla" hidden>
+  <div class="inicio-rejilla">
+    <section class="cara" id="cara-inicio" aria-label="Inicio">
+      <div class="cara-saludo"><span id="saludo">Hola</span><small id="fecha"></small></div>
+      <button class="cara-burbuja" type="button" id="burbuja-inicio" aria-label="Hablar con Bubble"><canvas></canvas></button>
+      <div class="cara-pista" id="pista-inicio">Toca a Bubble para platicar</div>
+    </section>
+
+    <div class="widgets">
+      <button class="widget" type="button" id="w-clima" aria-label="Clima">
+        <h2><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><span id="clima-ciudad">Clima</span></h2>
+        <div class="clima-fila">
+          <div class="clima-num" id="clima-temp">--°</div>
+          <div class="clima-desc" id="clima-desc">Cargando…</div>
+        </div>
+      </button>
+      <button class="widget" type="button" id="w-musica">
+        <h2><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>Música</h2>
+        <div class="musica-w">
+          <div class="musica-portada"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></div>
+          <div><strong>Playlist del equipo</strong><span>Toca para escuchar en Spotify</span></div>
+        </div>
+      </button>
+      <button class="widget" type="button" id="w-libro">
+        <h2><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5z"/><path d="M4 20.5A2.5 2.5 0 0 0 6.5 23H20v-5"/></svg><span id="w-libro-sub">Próxima sesión</span></h2>
+        <strong class="libro-w-fecha" id="w-libro-fecha"></strong>
+        <span class="nota" id="w-libro-n"></span>
+      </button>
+      <div class="widget ancho" id="w-dato">
+        <h2><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 22V12"/><path d="M12 12c0-5 3-8 8-9-1 5-4 8-8 9z"/><path d="M12 15c0-4-3-6-7-7 1 4 3 6 7 7z"/></svg>Dato del manglar</h2>
+        <div class="dato-num" id="dato-num"></div>
+        <p class="dato-txt" id="dato-txt"></p>
+        <a class="fuente-link" id="dato-fuente" target="_blank" rel="noopener"></a>
+      </div>
+      <div class="widget ancho" id="w-ideas">
+        <h2><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M8.5 9.5h.01M15.5 9.5h.01M8.5 14.5c1 1 2.2 1.5 3.5 1.5s2.5-.5 3.5-1.5"/></svg>Pídele a Bubble</h2>
+        <div class="chips" id="ideas-inicio"></div>
+      </div>
+    </div>
+  </div>
+
+  <nav class="dock" aria-label="Apps">
+    <button class="app" type="button" data-abre="chat"><span class="app-icono burbuja-icono"><canvas id="icono-burbuja"></canvas></span><span class="app-nombre">Bubble</span></button>
+    <button class="app" type="button" data-abre="pastilla"><span class="app-icono" style="--g:linear-gradient(160deg,#5EE0CF,#1C8FB8)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2.5" y="8" width="19" height="8" rx="4" transform="rotate(-35 12 12)"/><path d="M9.2 7.9l5.6 8.2" /></svg></span><span class="app-nombre">Pastilla</span></button>
+    <button class="app" type="button" data-abre="libro"><span class="app-icono" style="--g:linear-gradient(160deg,#F7B267,#D9622B)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5z"/><path d="M4 20.5A2.5 2.5 0 0 0 6.5 23H20v-5M8 8h8M8 12h6"/></svg></span><span class="app-nombre">Libro</span></button>
+    <button class="app" type="button" data-abre="fotos"><span class="app-icono" style="--g:conic-gradient(from 200deg,#FFCF6E,#FF6FAE,#7A5CFA,#5AD7C6,#FFCF6E)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="3"/><circle cx="9" cy="10" r="2"/><path d="M21 16l-5-5-8 9"/></svg></span><span class="app-nombre">Fotos</span></button>
+    <button class="app" type="button" data-abre="graficas"><span class="app-icono" style="--g:linear-gradient(160deg,#9B84FF,#6246EA)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg></span><span class="app-nombre">Gráficas</span></button>
+    <button class="app" type="button" data-abre="robot"><span class="app-icono" style="--g:linear-gradient(160deg,#FFB547,#EF7B10)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="19" r="2"/><circle cx="19" cy="5" r="2"/><path d="M7 19h6a3 3 0 0 0 0-6h-2a3 3 0 0 1 0-6h6"/></svg></span><span class="app-nombre">Recorridos</span></button>
+    <button class="app" type="button" data-abre="manglares"><span class="app-icono" style="--g:linear-gradient(160deg,#3CC9B1,#0B7A6B)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="7" r="4.5"/><path d="M12 11v4M12 15c-2 1-4 3-5 6M12 15c2 1 4 3 5 6M12 15v6M3 21h18"/></svg></span><span class="app-nombre">Manglares</span></button>
+    <button class="app" type="button" data-abre="ajustes"><span class="app-icono" style="--g:linear-gradient(160deg,#A1A1A6,#636366)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></span><span class="app-nombre">Ajustes</span></button>
+  </nav>
+</main>
+
+<!-- ============ Hojas ============ -->
+<div class="hoja" id="h-chat" role="dialog" aria-modal="true" aria-labelledby="ht-chat">
+  <div class="hoja-caja">
+    <div class="hoja-cabeza"><h2 id="ht-chat">Bubble</h2><button class="btn btn-icono cerrar" type="button" data-cierra aria-label="Cerrar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+    <div class="hoja-cuerpo" style="padding-top:6px;padding-bottom:0">
+      <div class="chat">
+        <div class="chat-cabeza">
+          <button class="chat-burbuja" type="button" id="burbuja-chat" aria-label="Hablar con Bubble"><canvas></canvas></button>
+          <div class="chat-estado" id="chat-estado" aria-live="polite"></div>
+        </div>
+        <div class="mensajes" id="mensajes" aria-live="polite"></div>
+        <div class="chat-pie">
+          <div class="chips" id="chat-ideas"></div>
+          <form class="chat-escribe" id="form-chat">
+            <label class="solo-lector" for="chat-texto">Mensaje para Bubble</label>
+            <textarea id="chat-texto" rows="1" placeholder="Pregúntale algo a Bubble" enterkeyhint="send"></textarea>
+            <button class="btn btn-icono mic" type="button" id="btn-mic" aria-label="Hablar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0M12 17v5"/></svg></button>
+            <button class="btn btn-icono btn-pri" type="submit" aria-label="Enviar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg></button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="hoja" id="h-graficas" role="dialog" aria-modal="true" aria-labelledby="ht-graficas">
+  <div class="hoja-caja">
+    <div class="hoja-cabeza"><h2 id="ht-graficas">Gráficas</h2><button class="btn btn-icono cerrar" type="button" data-cierra aria-label="Cerrar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+    <div class="hoja-cuerpo">
+      <div class="graf-rejilla">
+        <div style="display:grid;gap:12px">
+          <div class="panel" style="display:grid;gap:10px">
+            <h3>Pídesela a Bubble</h3>
+            <textarea id="g-pide" rows="3" placeholder="Ej.: gráfica de los 5 países con más manglar, o pega aquí tus datos"></textarea>
+            <div class="fila"><button class="btn btn-pri" type="button" id="g-hacer">Hacer gráfica</button></div>
+          </div>
+          <div class="panel" style="display:grid;gap:10px">
+            <h3>Tus datos</h3>
+            <label class="etiqueta">Título<input type="text" id="g-titulo" maxlength="90"></label>
+            <div class="segmentos" id="g-tipo" role="group" aria-label="Tipo de gráfica">
+              <button type="button" data-v="barras">Barras</button><button type="button" data-v="barrasH">Horizontal</button><button type="button" data-v="lineas">Líneas</button><button type="button" data-v="pastel">Pastel</button><button type="button" data-v="dona">Dona</button>
+            </div>
+            <div style="overflow-x:auto"><table class="tabla-datos" id="g-tabla"></table></div>
+            <div class="fila">
+              <button class="btn btn-chico" type="button" id="g-fila">Agregar fila</button>
+              <button class="btn btn-chico" type="button" id="g-serie">Agregar serie</button>
+              <button class="btn btn-chico" type="button" id="g-pegar-btn">Pegar de Excel</button>
+            </div>
+            <div id="g-pegar" hidden style="display:grid;gap:8px">
+              <textarea id="g-pegar-txt" rows="4" placeholder="Copia las celdas en Excel, Numbers o Sheets y pégalas aquí"></textarea>
+              <div class="fila"><button class="btn btn-chico btn-suave" type="button" id="g-pegar-ok">Usar estos datos</button></div>
+            </div>
+            <div class="rejilla-2">
+              <label class="etiqueta">Eje horizontal<input type="text" id="g-ejex" maxlength="40"></label>
+              <label class="etiqueta">Eje vertical<input type="text" id="g-ejey" maxlength="40"></label>
+            </div>
+            <label class="etiqueta">Fuente de los datos<input type="text" id="g-fuente" maxlength="120" placeholder="Ej.: CONABIO 2025"></label>
+          </div>
+          <div class="panel">
+            <h3>Guardadas</h3>
+            <div class="fila"><input type="text" id="g-nombre" placeholder="Nombre para guardar" maxlength="40" style="flex:1"><button class="btn btn-chico" type="button" id="g-guardar">Guardar</button></div>
+            <div class="lista-guardadas" id="g-lista"></div>
+          </div>
+        </div>
+        <div>
+          <div class="graf-lienzo"><div class="lienzo-alto lienzo-editor"><canvas id="g-canvas" role="img" aria-label="Vista previa de la gráfica"></canvas></div></div>
+          <div class="fila" style="margin-top:12px">
+            <button class="btn btn-pri" type="button" id="g-mejorar">Mejorar con Bubble</button>
+            <button class="btn" type="button" id="g-descargar">Descargar imagen</button>
+          </div>
+          <div class="panel consejos" id="g-consejos" hidden></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="hoja" id="h-robot" role="dialog" aria-modal="true" aria-labelledby="ht-robot">
+  <div class="hoja-caja">
+    <div class="hoja-cabeza"><h2 id="ht-robot">Recorridos del robot</h2><button class="btn btn-icono cerrar" type="button" data-cierra aria-label="Cerrar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+    <div class="hoja-cuerpo">
+      <div class="robot-rejilla">
+        <div style="display:grid;gap:12px">
+          <div class="pista-caja">
+            <canvas class="pista" id="r-pista" role="img" aria-label="Pista del robot. Toca para agregar puntos del recorrido."></canvas>
+            <p class="nota" id="r-ayuda" style="margin-top:8px">Toca la pista para poner el inicio del robot y luego cada punto por donde debe pasar. Arrastra un punto para moverlo.</p>
+          </div>
+          <div class="fila">
+            <button class="btn btn-chico" type="button" id="r-deshacer">Deshacer</button>
+            <button class="btn btn-chico" type="button" id="r-borrar">Borrar todo</button>
+            <button class="btn btn-chico btn-suave" type="button" id="r-optimizar">Optimizar</button>
+            <button class="btn btn-chico" type="button" id="r-copiar">Copiar pasos</button>
+          </div>
+          <div class="panel" style="display:grid;gap:10px">
+            <h3>Pídele ayuda a Bubble</h3>
+            <div class="fila">
+              <select id="r-tipo" style="flex:1;min-width:160px" aria-label="Tipo de robot">
+                <option>LEGO SPIKE Prime</option><option>LEGO EV3</option><option>LEGO SPIKE Essential</option><option>Arduino</option><option>VEX IQ</option><option>Otro</option>
+              </select>
+              <button class="btn btn-chico btn-pri" type="button" id="r-codigo">Hacer el código</button>
+              <button class="btn btn-chico" type="button" id="r-mejora">Mejorar recorrido</button>
+            </div>
+          </div>
+        </div>
+        <div style="display:grid;gap:12px">
+          <div class="panel">
+            <div class="resumen">
+              <div><strong id="r-dist">0</strong><span>cm en total</span></div>
+              <div><strong id="r-giros">0</strong><span>giros</span></div>
+              <div><strong id="r-tiempo">0 s</strong><span>tiempo aprox.</span></div>
+            </div>
+          </div>
+          <div class="panel">
+            <h3>Pasos</h3>
+            <ol class="pasos" id="r-pasos"></ol>
+          </div>
+          <div class="panel" style="display:grid;gap:10px">
+            <h3>Pista y robot</h3>
+            <div class="rejilla-2">
+              <label class="etiqueta">Ancho de pista (cm)<input type="number" id="r-ancho" min="20" max="1000" step="1"></label>
+              <label class="etiqueta">Alto de pista (cm)<input type="number" id="r-alto" min="20" max="1000" step="1"></label>
+              <label class="etiqueta">Rueda (diámetro, cm)<input type="number" id="r-rueda" min="1" max="30" step="0.1"></label>
+              <label class="etiqueta">Velocidad (cm/s)<input type="number" id="r-vel" min="1" max="200" step="1"></label>
+            </div>
+            <label class="etiqueta">El robot empieza mirando hacia
+              <select id="r-rumbo"><option value="0">La derecha →</option><option value="90">Arriba ↑</option><option value="180">La izquierda ←</option><option value="270">Abajo ↓</option></select>
+            </label>
+            <label class="interruptor">Ajustar giros a 45°<input type="checkbox" id="r-45"></label>
+            <div class="fila">
+              <label class="btn btn-chico" for="r-foto" style="cursor:pointer">Poner foto de la pista</label>
+              <input type="file" id="r-foto" accept="image/*" hidden>
+              <button class="btn btn-chico" type="button" id="r-quitar-foto" hidden>Quitar foto</button>
+            </div>
+          </div>
+          <div class="panel">
+            <h3>Guardados</h3>
+            <div class="fila"><input type="text" id="r-nombre" placeholder="Nombre del recorrido" maxlength="40" style="flex:1"><button class="btn btn-chico" type="button" id="r-guardar">Guardar</button></div>
+            <div class="lista-guardadas" id="r-lista"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="hoja" id="h-manglares" role="dialog" aria-modal="true" aria-labelledby="ht-manglares">
+  <div class="hoja-caja">
+    <div class="hoja-cabeza"><h2 id="ht-manglares">Manglares y estuarios</h2><button class="btn btn-icono cerrar" type="button" data-cierra aria-label="Cerrar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+    <div class="hoja-cuerpo">
+      <div class="mang-intro"><p>Datos revisados en fuentes oficiales y científicas. Toca una fuente para verla. Para cualquier otra estadística, pregúntale a Bubble: busca en fuentes confiables y te dice de dónde viene cada número.</p></div>
+      <div class="panel" style="display:grid;gap:10px;margin-bottom:14px">
+        <form class="fila" id="form-mang">
+          <label class="solo-lector" for="mang-q">Pregunta sobre manglares o estuarios</label>
+          <input type="search" id="mang-q" placeholder="Ej.: ¿cuántas aves viven en los manglares de Yucatán?" style="flex:1;min-width:200px">
+          <button class="btn btn-pri" type="submit">Preguntar</button>
+        </form>
+        <div class="chips" id="mang-ideas"></div>
+      </div>
+      <div class="datos-rejilla" id="mang-datos"></div>
+      <div class="mang-graficas">
+        <div class="panel"><h3>Manglar en México</h3><div class="lienzo-alto" style="--h:250px"><canvas id="mang-g1" role="img" aria-label="Gráfica de hectáreas de manglar en México en 2020 y 2025"></canvas></div></div>
+        <div class="panel"><h3>Ecosistemas de manglar del mundo</h3><div class="lienzo-alto" style="--h:250px"><canvas id="mang-g2" role="img" aria-label="Gráfica del riesgo de colapso de los ecosistemas de manglar"></canvas></div></div>
+      </div>
+      <div class="panel">
+        <h3>Las 4 especies de mangle de México</h3>
+        <div class="especies" id="mang-especies"></div>
+        <p class="nota" style="margin-top:10px"><a class="fuente-link" href="https://www.cronica.com.mx/academia/manglar-olvido.html" target="_blank" rel="noopener">Fuente: La Crónica, sección Academia</a></p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="hoja" id="h-pastilla" role="dialog" aria-modal="true" aria-labelledby="ht-pastilla">
+  <div class="hoja-caja">
+    <div class="hoja-cabeza"><h2 id="ht-pastilla">Proyecto Pastilla</h2><button class="btn btn-icono cerrar" type="button" data-cierra aria-label="Cerrar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+    <div class="hoja-cuerpo">
+      <div class="pastilla">
+        <section class="pastilla-portada">
+          <canvas id="p-canvas" class="pastilla-anim" role="img" aria-label="Animación: la pastilla se disuelve, los residuos se juntan y caen al fondo, y el agua queda clara"></canvas>
+          <div class="pastilla-texto">
+            <h3>Hipótesis · enfoque en la purificación (científica)</h3>
+            <blockquote id="p-hipotesis"></blockquote>
+            <div class="fila"><button class="btn btn-chico" type="button" id="p-copiar">Copiar hipótesis</button></div>
+          </div>
+        </section>
+        <section class="panel">
+          <h3>Cómo funcionaría, paso a paso</h3>
+          <ol class="pasos-pastilla">
+            <li><strong>Disolución.</strong> La pastilla entra al agua y su núcleo de cristales microscópicos se disuelve poco a poco.</li>
+            <li><strong>Agitación.</strong> Al mover el agua, los agentes se reparten por todo el líquido.</li>
+            <li><strong>Unión.</strong> Las nanoestructuras se pegan a partículas, bacterias y contaminantes.</li>
+            <li><strong>Coagulación y floculación.</strong> Los residuos se juntan en grumos más grandes y pesados.</li>
+            <li><strong>Sedimentación.</strong> La gravedad hace que los grumos caigan al fondo.</li>
+            <li><strong>Separación.</strong> Queda el agua clara arriba y los residuos abajo.</li>
+          </ol>
+        </section>
+        <section class="panel" style="display:grid;gap:10px">
+          <h3>Pídele ayuda a Bubble</h3>
+          <div class="chips" id="p-ideas"></div>
+          <form class="fila" id="form-pastilla">
+            <label class="solo-lector" for="p-q">Pregunta sobre la pastilla</label>
+            <input type="search" id="p-q" placeholder="Pregunta lo que quieras sobre la pastilla" style="flex:1;min-width:200px">
+            <button class="btn btn-pri" type="submit">Preguntar</button>
+          </form>
+        </section>
+        <p class="aviso-seguridad">Por seguridad: no beban el agua de los experimentos. Para saber si el agua es potable hace falta filtrarla, desinfectarla y hacer un análisis de laboratorio.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="hoja" id="h-libro" role="dialog" aria-modal="true" aria-labelledby="ht-libro">
+  <div class="hoja-caja">
+    <div class="hoja-cabeza"><h2 id="ht-libro">Libro del equipo</h2><button class="btn btn-icono cerrar" type="button" data-cierra aria-label="Cerrar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+    <div class="hoja-cuerpo">
+      <div class="libro-rejilla">
+        <section class="libro-pagina" aria-live="polite">
+          <div class="libro-nav">
+            <button class="btn btn-icono" type="button" id="l-ant" aria-label="Sesión anterior"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button>
+            <div class="libro-titulo"><h3 id="l-fecha"></h3><span id="l-sub"></span></div>
+            <button class="btn btn-icono" type="button" id="l-sig" aria-label="Sesión siguiente"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></button>
+          </div>
+          <div class="libro-notas" id="l-notas"></div>
+          <form id="l-form" class="libro-form">
+            <label class="solo-lector" for="l-texto">Nueva nota</label>
+            <textarea id="l-texto" rows="3" maxlength="3000" placeholder="Escribe una nota para esta sesión"></textarea>
+            <div class="fila"><button class="btn btn-pri" type="submit">Agregar nota</button><button class="btn" type="button" id="l-resumen">Resumen de Bubble</button></div>
+          </form>
+          <div class="panel consejos" id="l-resumen-txt" hidden></div>
+        </section>
+        <aside class="panel" style="display:grid;gap:10px;align-content:start">
+          <h3>Sesiones</h3>
+          <p class="nota">El libro sigue para siempre: cada miércoles y cada sábado tiene su página.</p>
+          <div class="fila"><button class="btn btn-chico btn-suave" type="button" id="l-hoy">Ir a la sesión de hoy</button></div>
+          <div class="lista-guardadas" id="l-indice"></div>
+          <p class="nota" id="l-estado"></p>
+        </aside>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="hoja" id="h-fotos" role="dialog" aria-modal="true" aria-labelledby="ht-fotos">
+  <div class="hoja-caja">
+    <div class="hoja-cabeza"><h2 id="ht-fotos">Fotos</h2><button class="btn btn-icono cerrar" type="button" data-cierra aria-label="Cerrar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+    <div class="hoja-cuerpo">
+      <div class="fotos-barra">
+        <div class="segmentos" id="f-album" role="group" aria-label="Álbum">
+          <button type="button" data-v="todas">Todas</button><button type="button" data-v="machaca">Machaca</button><button type="button" data-v="general">General</button><button type="button" data-v="bubble">Dibujos</button>
+        </div>
+        <label class="btn btn-pri" for="f-subir" style="cursor:pointer">Subir fotos</label>
+        <input type="file" id="f-subir" accept="image/*" multiple hidden>
+      </div>
+      <p class="nota" id="f-estado"></p>
+      <section class="album-machaca" id="f-machaca" hidden>
+        <div class="album-logo" id="f-logo"></div>
+        <div class="album-info"><h3>Álbum de Machaca</h3><p class="nota">Lleva los colores del logo del equipo. Sube el logo y Bubble toma sus colores.</p><div class="album-colores" id="f-colores"></div></div>
+        <label class="btn btn-chico" for="f-logo-in" style="cursor:pointer">Poner logo</label>
+        <input type="file" id="f-logo-in" accept="image/*" hidden>
+      </section>
+      <div class="galeria" id="f-galeria"></div>
+      <div class="visor" id="f-visor" hidden role="dialog" aria-label="Foto">
+        <img id="f-visor-img" alt="">
+        <div class="visor-pie">
+          <div class="visor-quien" id="f-visor-quien"></div>
+          <p class="visor-desc" id="f-visor-desc"></p>
+          <div class="fila">
+            <button class="btn btn-chico" type="button" id="f-ant">Anterior</button>
+            <button class="btn btn-chico" type="button" id="f-sig">Siguiente</button>
+            <button class="btn btn-chico" type="button" id="f-descargar">Descargar</button>
+            <button class="btn btn-chico" type="button" id="f-borrar">Borrar</button>
+            <button class="btn btn-chico btn-pri" type="button" id="f-cerrar-visor">Cerrar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="hoja" id="h-musica" role="dialog" aria-modal="true" aria-labelledby="ht-musica">
+  <div class="hoja-caja">
+    <div class="hoja-cabeza"><h2 id="ht-musica">Música</h2><button class="btn btn-icono cerrar" type="button" data-cierra aria-label="Cerrar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+    <div class="hoja-cuerpo">
+      <div class="musica-hoja">
+        <section class="musica-completa">
+          <div>
+            <h3>Escúchala completa</h3>
+            <p class="nota">Dentro de Bubble, Spotify solo deja oír 30 segundos de cada canción (es una regla de Spotify). Para oírlas completas, ábrela en la app de Spotify.</p>
+          </div>
+          <a class="btn btn-pri btn-spotify" href="https://open.spotify.com/playlist/2CMThLvKBp0bmwBCC1ETNo" target="_blank" rel="noopener">Escuchar completa en Spotify</a>
+        </section>
+        <div id="musica-marco"></div>
+        <section class="panel" style="display:grid;gap:10px">
+          <h3>Platica de música con Bubble</h3>
+          <div class="chips" id="musica-ideas"></div>
+        </section>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="hoja" id="h-ajustes" role="dialog" aria-modal="true" aria-labelledby="ht-ajustes">
+  <div class="hoja-caja">
+    <div class="hoja-cabeza"><h2 id="ht-ajustes">Ajustes</h2><button class="btn btn-icono cerrar" type="button" data-cierra aria-label="Cerrar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+    <div class="hoja-cuerpo"><div class="ajustes" id="ajustes"></div></div>
+  </div>
+</div>
+
+<div class="hoja" id="h-conoceme" role="dialog" aria-modal="true" aria-labelledby="ht-conoceme">
+  <div class="hoja-caja">
+    <div class="hoja-cabeza"><h2 id="ht-conoceme">Que Bubble te conozca</h2><button class="btn btn-icono cerrar" type="button" data-cierra aria-label="Cerrar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+    <div class="hoja-cuerpo">
+      <div class="ajustes">
+        <p class="nota">Bubble se adapta a cada persona. Elige cómo quieres que te hable; con el tiempo también aprende de sus pláticas contigo.</p>
+        <div class="grupo"><h3>¿Cómo quieres que te hable?</h3><div class="chips" id="c-estilo"></div></div>
+        <div class="grupo"><h3>¿Cuánto detalle prefieres?</h3><div class="chips" id="c-detalle"></div></div>
+        <div class="grupo"><h3>¿Qué haces en el equipo?</h3><div class="chips" id="c-area"></div></div>
+        <div class="grupo"><h3>Algo más que deba saber de ti</h3><textarea id="c-extra" rows="3" maxlength="300" placeholder="Ej.: me gusta que me expliquen con ejemplos de fútbol"></textarea></div>
+        <div class="fila"><button class="btn btn-pri" type="button" id="c-listo">Listo</button></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="chart.umd.js"></script>
+<script src="burbuja.js"></script>
+<script src="gemini.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

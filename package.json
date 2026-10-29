@@ -1,0 +1,9 @@
+{
+  "name": "bubble",
+  "private": true,
+  "type": "module",
+  "description": "Bubble, la IA del equipo Machaca",
+  "dependencies": {
+    "@netlify/blobs": "^8.1.0"
+  }
+}
